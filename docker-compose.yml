@@ -2,21 +2,37 @@ version: '2'
 services:
   db:
     image: postgres:9.5
+    ports:
+      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=odoo
       - POSTGRES_USER=odoo
     restart: always             # run as a service  
 
   odoo11:
+    container_name: odoo11
     image: odoo:11.0
     depends_on:
       - db
+    tty: true
+    environment:
+      - ODOO_CONNECTOR_PORT=8069
+      - ODOO_CONNECTOR_CHANNELS=root:4,root.woo:2
     ports:
       - "8070:8069"
-    tty: true
-    command: -- --dev=reload
+    command: -- --dev=reload --proxy-mode --log-handler=odoo.addons.queue_job:DEBUG
 #    command: odoo scaffold /mnt/extra-addons/test_module
     volumes:
       - ./addons:/mnt/extra-addons
       - ./etc:/etc/odoo
-    restart: always             # run as a service  
+      - ./dist-packages:/usr/local/lib/python3.5/dist-packages
+    restart: always             # run as a service
+
+  nginx:
+    image: nginx
+    depends_on:
+      - odoo11
+    ports:
+      - "8069:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
