@@ -17,7 +17,7 @@ services:
     tty: true
     environment:
       - ODOO_CONNECTOR_PORT=8069
-      - ODOO_CONNECTOR_CHANNELS=root:4,root.woo:2
+      - ODOO_CONNECTOR_CHANNELS=root:10,root.skuvault:2,root.amazon:2,root.woo:2,root.recipal:2,root.qbo:2
     ports:
       - "8070:8069"
     command: -- --dev=reload --proxy-mode --log-handler=odoo.addons.queue_job:DEBUG
